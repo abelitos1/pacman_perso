@@ -1,0 +1,25 @@
+# Pac-Man configuration file
+# Lines starting with # are comments and must be ignored by the parser
+
+{
+    "highscore_filename": "highscores.json",
+
+    # seed is used to generate level 1 deterministically;
+    # subsequent levels are generated randomly
+    "seed": 42,
+
+    "lives": 3,
+
+    "pacgum": 42,
+    "points_per_pacgum": 10,
+    "points_per_super_pacgum": 50,
+    "points_per_ghost": 200,
+
+    "level_max_time": 90,
+
+    "level": [
+        { "width": 21, "height": 21 },
+        { "width": 21, "height": 25 },
+        { "width": 25, "height": 25 }
+    ]
+}

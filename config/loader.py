@@ -45,9 +45,58 @@ def parse_json(text: str) -> dict[str, Any]:
         raise ConfigError(f"invalid JSON: {e.msg} (line {e.lineno}, col {e.colno})") from e
     return (out)
 
+def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -> int:
 
+    value = data.get(key)
+    if value is None:
+        print(f"missing key '{key}', using default {default}")
+        return default
+    if not isinstance(value, int) or isinstance(value, bool):
+        print(f"invalid type for '{key}' (expected int), using default {default}")
+        return default
+    if value < min_value:
+        print(f"'{key}' below minimum ({min_value}), using default {default}")
+        return default
+    return value
 
+def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -> str:
 
+    value = data.get(key)
+    if value is None:
+        print(f"missing key '{key}', using default {default}")
+        return default
+    if not isinstance(value, str):
+        print(f"invalid type for '{key}' (expected str), using default {default}")
+        return default
+    return value
+
+def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
+    raw_levels = data.get("level")
+
+    if not isinstance(raw_levels, list) or len(raw_levels) == 0:
+        print("missing/invalid 'level' array, using fallback of 10 levels 21x21")
+        result = []
+        for _ in range(10):
+            result.append(LevelConfig(width=21, height=21))
+        return result
+
+    levels: list[LevelConfig] = []
+    for index, entry in enumerate(raw_levels):
+        if not isinstance(entry, dict):
+            print(f"invalid level entry at index {index}, using fallback 21x21")
+            levels.append(LevelConfig(width=21, height=21))
+            continue
+
+        width = _get_int(entry, "width", default=21, min_value=5)
+        height = _get_int(entry, "height", default=21, min_value=5)
+        levels.append(LevelConfig(width=width, height=height))
+
+    return levels
 
 if __name__ == "__main__":
-    print(parse_json("config.json"))
+    print(
+    _get_int({}, "lives", default=3) ,                  # → doit logger + retourner 3
+    _get_int({"lives": "trois"}, "lives", default=3),   # → doit logger + retourner 3
+    _get_int({"lives": True}, "lives", default=3),    # → doit logger + retourner 3 (piège bool)
+    _get_int({"lives": -1}, "lives", default=3),     # → doit logger + retourner 3
+    _get_int({"lives": 5}, "lives", default=3))

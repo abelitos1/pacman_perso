@@ -78,7 +78,7 @@ def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
         result = []
         for _ in range(10):
             result.append(LevelConfig(width=21, height=21))
-        return result
+         return result
 
     levels: list[LevelConfig] = []
     for index, entry in enumerate(raw_levels):
@@ -92,6 +92,33 @@ def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
         levels.append(LevelConfig(width=width, height=height))
 
     return levels
+
+
+def load_config(path: str) -> Config:
+    if not path.endswith(".json"):
+        raise ConfigError("config file must be a .json file")
+
+    data = parse_json(read_file(path))
+
+    if not isinstance(data, dict):
+        raise ConfigError("config root must be a JSON object")
+    
+    return Config(
+        highscore_filename = _get_str(data, "highscore_filename",default = "highscores.json"),
+        lives = _get_int(data, "lives", default=3, min_value=0),
+        pacgum = _get_int(data, "pacgum", default=42, min_value=0),
+        points_per_pacgum = _get_int(data, "points_per_pacgum", default=10, min_value=0),
+        points_per_super_pacgum = _get_int(data, "points_per_super_pacgum", default=50, min_value=0),
+        points_per_ghost = _get_int(data, "points_per_ghost", default=200, min_value=0),
+        seed = _get_int(data, "seed", default=42, min_value=0),
+        level_max_time = _get_int(data, "level_max_time", default=90, min_value=1),
+        levels = _get_levels(data),
+    )
+
+
+
+
+
 
 if __name__ == "__main__":
     print(

@@ -3,6 +3,9 @@ from game.maze_loader import Maze, MazeLoader
 
 
 def build_level_maze(config: Config, level_index: int) -> Maze:
+    if level_index >= len(config.levels):
+        print("no more levels defined, reusing last level")
+        level_index = len(config.levels) - 1
     level = config.levels[level_index]
 
     if level_index == 0:

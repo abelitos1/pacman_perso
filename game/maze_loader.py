@@ -84,6 +84,7 @@ class MazeLoader:
 
 
 if __name__ == "__main__":
-    loader = MazeLoader(width=21, height=21, entry=(10, 10), exit=(20, 20), seed=42)
+    loader = MazeLoader(width=21, height=21, entry=(10, 10), exit=(20, 20),\
+seed=42)
     maze = loader.load()
     print(maze.cells[0][0])

@@ -1,11 +1,14 @@
 import json
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
+from config.loader import ConfigError
+
 
 @dataclass
 class LevelConfig:
     width: int
     height: int
+
 
 @dataclass
 class Config:
@@ -37,15 +40,18 @@ def read_file(path: str) -> str:
 
     return (out)
 
+
 def parse_json(text: str) -> dict[str, Any]:
     out = {}
     try:
         out = json.loads(read_file(text))
     except json.JSONDecodeError as e:
-        raise ConfigError(f"invalid JSON: {e.msg} (line {e.lineno}, col {e.colno})") from e
+        raise ConfigError(f"invalid JSON: {e.msg}\
+ (line {e.lineno}, col {e.colno})") from e
     return (out)
 
-def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -> int:
+
+def _get_int(data: dict[str, Any], key: str,  default: int, min_value: int = 0) -> int:
 
     value = data.get(key)
     if value is None:
@@ -59,6 +65,7 @@ def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -
         return default
     return value
 
+
 def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -> str:
 
     value = data.get(key)
@@ -70,6 +77,7 @@ def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -
         return default
     return value
 
+
 def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
     raw_levels = data.get("level")
 
@@ -78,7 +86,7 @@ def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
         result = []
         for _ in range(10):
             result.append(LevelConfig(width=21, height=21))
-         return result
+        return result
 
     levels: list[LevelConfig] = []
     for index, entry in enumerate(raw_levels):
@@ -114,16 +122,3 @@ def load_config(path: str) -> Config:
         level_max_time = _get_int(data, "level_max_time", default=90, min_value=1),
         levels = _get_levels(data),
     )
-
-
-
-
-
-
-if __name__ == "__main__":
-    print(
-    _get_int({}, "lives", default=3) ,                  # → doit logger + retourner 3
-    _get_int({"lives": "trois"}, "lives", default=3),   # → doit logger + retourner 3
-    _get_int({"lives": True}, "lives", default=3),    # → doit logger + retourner 3 (piège bool)
-    _get_int({"lives": -1}, "lives", default=3),     # → doit logger + retourner 3
-    _get_int({"lives": 5}, "lives", default=3))

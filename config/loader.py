@@ -1,8 +1,10 @@
 import json
 from dataclasses import dataclass
 from typing import Any
-from config.loader import ConfigError
 
+
+class ConfigError(Exception):
+    pass
 
 @dataclass
 class LevelConfig:
@@ -44,7 +46,7 @@ def read_file(path: str) -> str:
 def parse_json(text: str) -> dict[str, Any]:
     out = {}
     try:
-        out = json.loads(read_file(text))
+        out = json.loads(text)
     except json.JSONDecodeError as e:
         raise ConfigError(f"invalid JSON: {e.msg}\
  (line {e.lineno}, col {e.colno})") from e

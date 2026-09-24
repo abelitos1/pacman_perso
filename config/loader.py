@@ -51,14 +51,16 @@ def parse_json(text: str) -> dict[str, Any]:
     return (out)
 
 
-def _get_int(data: dict[str, Any], key: str,  default: int, min_value: int = 0) -> int:
+def _get_int(data: dict[str, Any], key: str,
+             default: int, min_value: int = 0) -> int:
 
     value = data.get(key)
     if value is None:
         print(f"missing key '{key}', using default {default}")
         return default
     if not isinstance(value, int) or isinstance(value, bool):
-        print(f"invalid type for '{key}' (expected int), using default {default}")
+        print(f"invalid type for '{key}' \
+(expected int), using default {default}")
         return default
     if value < min_value:
         print(f"'{key}' below minimum ({min_value}), using default {default}")
@@ -66,14 +68,16 @@ def _get_int(data: dict[str, Any], key: str,  default: int, min_value: int = 0) 
     return value
 
 
-def _get_int(data: dict[str, Any], key: str, default: int, min_value: int = 0) -> str:
+def _get_str(data: dict[str, Any], key: str,
+             default: int, min_value: int = 0) -> str:
 
     value = data.get(key)
     if value is None:
         print(f"missing key '{key}', using default {default}")
         return default
     if not isinstance(value, str):
-        print(f"invalid type for '{key}' (expected str), using default {default}")
+        print(f"invalid type for '{key}' (expected str),\
+ using default {default}")
         return default
     return value
 
@@ -82,7 +86,8 @@ def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
     raw_levels = data.get("level")
 
     if not isinstance(raw_levels, list) or len(raw_levels) == 0:
-        print("missing/invalid 'level' array, using fallback of 10 levels 21x21")
+        print("missing/invalid 'level' array, \
+using fallback of 10 levels 21x21")
         result = []
         for _ in range(10):
             result.append(LevelConfig(width=21, height=21))
@@ -91,7 +96,8 @@ def _get_levels(data: dict[str, Any]) -> list[LevelConfig]:
     levels: list[LevelConfig] = []
     for index, entry in enumerate(raw_levels):
         if not isinstance(entry, dict):
-            print(f"invalid level entry at index {index}, using fallback 21x21")
+            print(f"invalid level entry at index {index}, \
+using fallback 21x21")
             levels.append(LevelConfig(width=21, height=21))
             continue
 
@@ -110,15 +116,20 @@ def load_config(path: str) -> Config:
 
     if not isinstance(data, dict):
         raise ConfigError("config root must be a JSON object")
-    
+
     return Config(
-        highscore_filename = _get_str(data, "highscore_filename",default = "highscores.json"),
-        lives = _get_int(data, "lives", default=3, min_value=0),
-        pacgum = _get_int(data, "pacgum", default=42, min_value=0),
-        points_per_pacgum = _get_int(data, "points_per_pacgum", default=10, min_value=0),
-        points_per_super_pacgum = _get_int(data, "points_per_super_pacgum", default=50, min_value=0),
-        points_per_ghost = _get_int(data, "points_per_ghost", default=200, min_value=0),
-        seed = _get_int(data, "seed", default=42, min_value=0),
-        level_max_time = _get_int(data, "level_max_time", default=90, min_value=1),
-        levels = _get_levels(data),
+        highscore_filename=_get_str(data, "highscore_filename",
+                                    default="highscores.json"),
+        lives=_get_int(data, "lives", default=3, min_value=0),
+        pacgum=_get_int(data, "pacgum", default=42, min_value=0),
+        points_per_pacgum=_get_int(data, "points_per_pacgum",
+                                   default=10, min_value=0),
+        points_per_super_pacgum=_get_int(data, "points_per_super_pacgum",
+                                         default=50, min_value=0),
+        points_per_ghost=_get_int(data, "points_per_ghost", default=200,
+                                  min_value=0),
+        seed=_get_int(data, "seed", default=42, min_value=0),
+        level_max_time=_get_int(data, "level_max_time", default=90,
+                                min_value=1),
+        levels=_get_levels(data),
     )

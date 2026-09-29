@@ -6,6 +6,7 @@ from typing import Any
 class ConfigError(Exception):
     pass
 
+
 @dataclass
 class LevelConfig:
     width: int
@@ -29,7 +30,7 @@ def read_file(path: str) -> str:
     try:
         with open(path, "r") as f:
             out = ""
-            for index, line in enumerate(f, start=1):
+            for line in f:
                 clean_line = line.strip()
                 if clean_line == "":
                     continue
@@ -44,13 +45,14 @@ def read_file(path: str) -> str:
 
 
 def parse_json(text: str) -> dict[str, Any]:
-    out = {}
     try:
         out = json.loads(text)
     except json.JSONDecodeError as e:
         raise ConfigError(f"invalid JSON: {e.msg}\
  (line {e.lineno}, col {e.colno})") from e
-    return (out)
+    if not isinstance(out, dict):
+        raise ConfigError("config root must be a JSON object")
+    return out
 
 
 def _get_int(data: dict[str, Any], key: str,
@@ -70,8 +72,7 @@ def _get_int(data: dict[str, Any], key: str,
     return value
 
 
-def _get_str(data: dict[str, Any], key: str,
-             default: int, min_value: int = 0) -> str:
+def _get_str(data: dict[str, Any], key: str, default: str) -> str:
 
     value = data.get(key)
     if value is None:
@@ -115,9 +116,6 @@ def load_config(path: str) -> Config:
         raise ConfigError("config file must be a .json file")
 
     data = parse_json(read_file(path))
-
-    if not isinstance(data, dict):
-        raise ConfigError("config root must be a JSON object")
 
     return Config(
         highscore_filename=_get_str(data, "highscore_filename",

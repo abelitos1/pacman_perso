@@ -21,7 +21,12 @@ WALL_ATTR = {
 
 
 def _phase(x: int, y: int, direction: int, salt: float = 0.0) -> float:
-    """Pseudo-random but stable phase in [0, 2*pi) for a wall."""
+    """Pseudo-random but stable phase in [0, 2*pi) for a wall.
+
+    Classic shader-style hash: the fractional part of a large multiple
+    of sin() looks random, but always gives the same value for the same
+    wall, so each wall keeps its own rhythm from frame to frame.
+    """
     n = math.sin(x * 12.9898 + y * 78.233 + direction * 37.719 + salt)
     n *= 43758.5453
     return (n - math.floor(n)) * 2 * math.pi
@@ -51,7 +56,19 @@ def _wall_segment(px: float, py: float, c: float, direction: int,
 
 
 def draw_maze(screen: pygame.Surface, maze: Maze, cell_size: int,
-              stats: VisualState, elapsed: float, scale: int) -> None:
+              stats: VisualState, elapsed: float, scale: float) -> None:
+    """Draw every wall of the maze, animated according to `stats`.
+
+    Args:
+        screen: Where to draw.
+        maze: The maze to draw.
+        cell_size: Size of a cell in pixels.
+        stats: Current wall animation parameters.
+        elapsed: Seconds since the start, drives the animation.
+        scale: Multiplier applied to wall thickness and bend.
+    """
+    # thickness oscillates between thick_l and thick_u, i.e. around
+    # their mean with an amplitude of half their difference
     thick_center = (stats.thick_u + stats.thick_l) / 2 * scale
     thick_range = (stats.thick_u - stats.thick_l) / 2 * scale
     bend_amp = stats.bend * scale
@@ -71,4 +88,5 @@ def draw_maze(screen: pygame.Surface, maze: Maze, cell_size: int,
                     bend_t + _wall_phase(x, y, direction, stats.chaos,
                                          salt=99))
                 start, end = _wall_segment(px, py, cell_size, direction, u)
-                pygame.draw.line(screen, WALL_COLOR, start, end, int(n))
+                pygame.draw.line(screen, WALL_COLOR, start, end,
+                                 max(1, int(n)))

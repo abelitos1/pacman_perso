@@ -10,16 +10,25 @@
 
     "lives": 3,
 
-    "pacgum": 42,
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,
     "points_per_ghost": 200,
 
     "level_max_time": 90,
 
+    # the subject asks for at least 10 levels; the '42' pattern needs at
+    # least 14x10, and every cell holds a pacgum, so levels stay small
+    # enough to be cleared within level_max_time
     "level": [
-        { "width":31, "height": 21 },
-        { "width": 55, "height": 55 },
-        { "width": 55, "height": 55 }
+        { "width": 15, "height": 11 },
+        { "width": 17, "height": 11 },
+        { "width": 17, "height": 13 },
+        { "width": 19, "height": 13 },
+        { "width": 19, "height": 15 },
+        { "width": 21, "height": 15 },
+        { "width": 21, "height": 17 },
+        { "width": 23, "height": 15 },
+        { "width": 23, "height": 17 },
+        { "width": 25, "height": 15 }
     ]
 }

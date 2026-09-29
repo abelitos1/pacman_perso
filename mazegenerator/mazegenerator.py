@@ -1,6 +1,6 @@
 import random
 from collections import deque
-from typing import Iterator
+from typing import Any, Iterator, Optional
 
 
 class MazeGenerator:
@@ -144,7 +144,7 @@ class MazeGenerator:
         # mazes never hit Python's recursion limit. Each frame keeps its own
         # neighbour generator, which preserves the original lazy evaluation
         # order (and its random side effects) exactly as the recursive version.
-        def _enter(cx, cy, fcode):
+        def _enter(cx: int, cy: int, fcode: int) -> list[Any]:
             self._path[cy][cx] = 1
             non_mutable = self._maze[cy][cx]
             self._maze[cy][cx] = 15 & ~fcode
@@ -172,7 +172,9 @@ class MazeGenerator:
                  (0, 1, 4, 'S'), (-1, 0, 8, 'W')]   # dx, dy, wall code, letter
         start = (self._entryx, self._entryy)
         goal = (self._exitx, self._exity)
-        prev: dict = {start: None}
+        prev: dict[tuple[int, int],
+                   Optional[tuple[tuple[int, int], str]]] = {
+            start: None}
         queue = deque([start])
         while queue:
             x, y = queue.popleft()
@@ -190,10 +192,10 @@ class MazeGenerator:
             print("MazeGenerator Class error: no shortest path found.")
             return
         letters = []
-        cur = goal
-        while prev[cur] is not None:
-            parent, letter = prev[cur]
+        step = prev[goal]
+        while step is not None:
+            parent, letter = step
             letters.append(letter)
-            cur = parent
+            step = prev[parent]
         self._shortest_path = ''.join(reversed(letters))
         return

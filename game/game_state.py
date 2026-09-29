@@ -1,25 +1,39 @@
+from dataclasses import dataclass
+from typing import Optional
+
 from config.loader import Config
-from game.maze_loader import Maze, MazeLoader
+from game.ghost import Ghost
+from game.level import build_level_maze
+from game.maze_loader import Maze
+from game.player import Player
 
 
-def build_level_maze(config: Config, level_index: int) -> Maze:
-    if level_index >= len(config.levels):
-        print("no more levels defined, reusing last level")
-        level_index = len(config.levels) - 1
-    level = config.levels[level_index]
+@dataclass
+class GameState:
+    """Everything that makes up a running game, independent of display."""
 
-    if level_index == 0:
-        seed = config.seed
-    else:
-        seed = 0
+    config: Config
+    level_index: int
+    maze: Maze
+    player: Player
+    ghosts: list[Ghost]
 
-    loader = MazeLoader(
-        width=level.width,
-        height=level.height,
-        entry=(0, 0),
-        exit=(level.width - 1, level.height - 1),
-        seed=seed,
-        perfect=False,
-    )
+    @classmethod
+    def new_game(cls, config: Config) -> "GameState":
+        maze = build_level_maze(config, level_index=0)
+        return cls(
+            config=config,
+            level_index=0,
+            maze=maze,
+            player=Player.at_center(maze, lives=config.lives),
+            ghosts=[Ghost.at_cell(*maze.entry)],
+        )
 
-    return loader.load()
+    def update(self, dt: float, direction: Optional[str]) -> None:
+        """Advance the game by `dt` seconds. `direction` is the move the
+        player is asking for this frame, if any."""
+        if direction is not None:
+            self.player.try_start_move(direction, self.maze)
+        self.player.update(dt)
+        for ghost in self.ghosts:
+            ghost.update_in(self.maze, dt)

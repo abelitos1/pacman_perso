@@ -1,18 +1,28 @@
+"""Adapter around the external A-Maze-ing package.
+
+The package is used as-is (it must not be modified): this module only
+calls it and converts its output (one wall bitmask per cell) into our
+own Maze / Cell types, so the rest of the game never depends on it.
+"""
 from dataclasses import dataclass
 from typing import Optional
+
 from mazegenerator import MazeGenerator
 
 Coord = tuple[int, int]
 
+# bits of a cell value in the generator output: a set bit is a wall
 WALL_N, WALL_E, WALL_S, WALL_W = 1, 2, 4, 8
 
 
 class MazeGenerationError(Exception):
-    pass
+    """Raised when the A-Maze-ing package fails to build a maze."""
 
 
 @dataclass
 class Cell:
+    """Walls around one maze cell."""
+
     wall_north: bool
     wall_east: bool
     wall_south: bool
@@ -21,6 +31,8 @@ class Cell:
 
 @dataclass
 class Maze:
+    """Maze grid, indexed as cells[y][x]."""
+
     width: int
     height: int
     cells: list[list[Cell]]
@@ -29,6 +41,7 @@ class Maze:
 
 
 class MazeLoader:
+    """Adapter from the external MazeGenerator to our Maze type."""
 
     def __init__(
         self,
@@ -39,6 +52,7 @@ class MazeLoader:
         seed: Optional[int] = None,
         perfect: bool = False,
     ) -> None:
+        """Store the generation parameters (seed None means 0)."""
         self.width = width
         self.height = height
         self.entry = entry
@@ -47,6 +61,11 @@ class MazeLoader:
         self.perfect = perfect
 
     def load(self) -> Maze:
+        """Run the generator and convert its output.
+
+        Raises:
+            MazeGenerationError: If the generator fails.
+        """
         try:
             generator = MazeGenerator(
                 size=(self.width, self.height),
@@ -56,11 +75,14 @@ class MazeLoader:
                 seed=self.seed,
             )
         except Exception as err:
-            raise MazeGenerationError(f"Maze generation failed: {err}")
+            # external code: any failure must end as a clean message
+            raise MazeGenerationError(
+                f"Maze generation failed: {err}") from err
 
         return self._convert(generator)
 
     def _convert(self, generator: MazeGenerator) -> Maze:
+        """Turn the generator's wall bitmasks into Cell objects."""
         cells = [
             [
                 Cell(

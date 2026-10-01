@@ -7,7 +7,6 @@ CONFIG	?= config.json
 
 MYPY_FLAGS := --warn-return-any --warn-unused-ignores --ignore-missing-imports \
 			  --disallow-untyped-defs --check-untyped-defs
-LINT_EXCLUDE := $(VENV)
 
 all: run
 
@@ -25,13 +24,16 @@ run: install
 debug: install
 	$(PY) -m pdb $(MAIN) $(CONFIG)
 
+test: install
+	$(PY) -m unittest discover -s tests -t . -v
+
 lint: install
-	$(PY) -m flake8 . --exclude $(LINT_EXCLUDE)
-	$(PY) -m mypy . --exclude $(LINT_EXCLUDE) $(MYPY_FLAGS)
+	$(PY) -m flake8 .
+	$(PY) -m mypy . $(MYPY_FLAGS)
 
 lint-strict: install
-	$(PY) -m flake8 . --exclude $(LINT_EXCLUDE)
-	$(PY) -m mypy . --exclude $(LINT_EXCLUDE) --strict
+	$(PY) -m flake8 .
+	$(PY) -m mypy . --strict
 
 clean:
 	find . -path ./$(VENV) -prune -o -type d -name __pycache__ -exec rm -rf {} +
@@ -42,4 +44,4 @@ fclean: clean
 
 re: fclean install
 
-.PHONY: all install run debug lint lint-strict clean fclean re
+.PHONY: all install run debug test lint lint-strict clean fclean re

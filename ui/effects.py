@@ -19,6 +19,7 @@ class VisualState:
 
 
 def preset_sober(stat: VisualState) -> None:
+    """Key u: thin, still walls (default look)."""
     stat.bend = 0
     stat.bend_speed = 0.05
     stat.thick_l = 7
@@ -28,6 +29,7 @@ def preset_sober(stat: VisualState) -> None:
 
 
 def preset_200ug(stat: VisualState) -> None:
+    """Key i: walls pulse in thickness, background trails."""
     stat.bend = 0
     stat.bend_speed = 0.05
     stat.thick_l = 2
@@ -37,6 +39,7 @@ def preset_200ug(stat: VisualState) -> None:
 
 
 def preset_500ug(stat: VisualState) -> None:
+    """Key o: walls pulse and bend, strong trails."""
     stat.bend = 1
     stat.bend_speed = 0.1
     stat.thick_l = 2
@@ -52,10 +55,12 @@ class ColorCycle:
     MAX = 150
 
     def __init__(self) -> None:
+        """Start from an orange-ish colour."""
         self.values = [150, 75, 0]
         self.rising = [False, True, True]
 
     def step(self) -> tuple[int, int, int]:
+        """Advance one frame and return the new colour."""
         for i in range(3):
             self.values[i] += 1 if self.rising[i] else -1
             if self.values[i] == self.MAX:
@@ -78,6 +83,7 @@ class StarLayer:
 
     def __init__(self, count: int, radius: float, speed: float, alpha: int,
                  width: int, height: int) -> None:
+        """Scatter `count` stars at random over a width x height area."""
         self.radius = radius
         self.speed = speed
         self.alpha = alpha
@@ -88,6 +94,7 @@ class StarLayer:
         ]
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Scroll the stars one frame and draw them."""
         for star in self.stars:
             star[0] = (star[0] + self.speed) % self.width
             pygame.draw.circle(
@@ -98,13 +105,13 @@ class StarLayer:
             )
 
 
-def make_star_layers(width: int, height: int,
-                     scale: int) -> list[StarLayer]:
+def make_star_layers(width: int, height: int) -> list[StarLayer]:
+    """Build the parallax layers described by STAR_LAYERS."""
     return [
         StarLayer(
             count=int(cfg["count"]),
-            radius=cfg["radius"] * scale,
-            speed=cfg["speed"] * scale,
+            radius=cfg["radius"],
+            speed=cfg["speed"],
             alpha=int(cfg["alpha"]),
             width=width,
             height=height,
